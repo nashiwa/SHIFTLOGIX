@@ -1,72 +1,70 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { Vehicle } from '../models/vehicle.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class FleetService {
-  private vehiclesSignal = signal<Vehicle[]>([
-    {
-      id: 'V101',
-      plateNumber: 'LDN-5521',
-      driverName: 'Alex Thompson',
-      status: 'In Transit',
-      fuelLevel: 82,
-      lastLocation: { lat: 51.5074, lng: -0.1278 }
-    },
-    {
-      id: 'V102',
-      plateNumber: 'MAN-9900',
-      driverName: 'Sarah Jenkins',
-      status: 'Available',
-      fuelLevel: 45,
-      lastLocation: { lat: 53.4808, lng: -2.2426 }
-    }
-  ]);
+  private STORAGE_KEY = 'shiftlogix_fleet';
 
-  // NEW: Tracks the active filter selection
-  private filterSignal = signal<'All' | 'Available' | 'In Transit'>('All');
+  // 1. Core Signals
+  private vehiclesSignal = signal<Vehicle[]>(this.getInitialVehicles());
+  private filterSignal = signal<'All' | 'Available' | 'In Transit' | 'Maintenance'>('All');
 
-  // NEW: This is the smart list. It updates automatically when vehicles OR filter changes.
+  constructor() {
+    // 2. The Auto-Save Effect
+    effect(() => {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.vehiclesSignal()));
+    });
+  }
+
+  // 3. Computed Signals (Data Selectors)
   public filteredVehicles = computed(() => {
-    const vehicles = this.vehiclesSignal();
-    const filter = this.filterSignal();
-
-    if (filter === 'All') return vehicles;
-    return vehicles.filter(v => v.status === filter);
+    const f = this.filterSignal();
+    const v = this.vehiclesSignal();
+    return f === 'All' ? v : v.filter(item => item.status === f);
   });
 
-  // Expose the current filter as read-only so the UI can highlight the active button
   public currentFilter = this.filterSignal.asReadonly();
-
-  // Stats (These still look at the WHOLE fleet)
-  public vehicles = this.vehiclesSignal.asReadonly();
-  public totalVehicles = computed(() => this.vehicles().length);
+  public totalVehicles = computed(() => this.vehiclesSignal().length);
+  public inTransitCount = computed(() => this.vehiclesSignal().filter(v => v.status === 'In Transit').length);
   
-  public inTransitCount = computed(() => 
-    this.vehicles().filter(v => v.status === 'In Transit').length
-  );
-
   public avgFuel = computed(() => {
-    if (this.totalVehicles() === 0) return 0;
-    const total = this.vehicles().reduce((acc, v) => acc + v.fuelLevel, 0);
-    return Math.round(total / this.totalVehicles());
+    const v = this.vehiclesSignal();
+    return v.length ? Math.round(v.reduce((acc, curr) => acc + curr.fuelLevel, 0) / v.length) : 0;
   });
 
-  // NEW: Method to update the filter
-  setFilter(newFilter: 'All' | 'Available' | 'In Transit') {
-    this.filterSignal.set(newFilter);
+  // 4. Methods to Change Data
+  setFilter(filter: 'All' | 'Available' | 'In Transit' | 'Maintenance') {
+    this.filterSignal.set(filter);
   }
 
-  updateStatus(vehicleId: string, newStatus: 'Available' | 'In Transit' | 'Maintenance') {
-    this.vehiclesSignal.update(vehicles => 
-      vehicles.map(v => v.id === vehicleId ? { ...v, status: newStatus } : v)
-    );
+  addVehicle(vehicle: Vehicle) {
+    this.vehiclesSignal.update(all => [...all, vehicle]);
   }
 
-  addVehicle(newVehicle: Vehicle) {
-    this.vehiclesSignal.update(vehicles => [...vehicles, newVehicle]);
+  updateStatus(id: string, status: 'Available' | 'In Transit' | 'Maintenance') {
+    this.vehiclesSignal.update(all => all.map(v => v.id === id ? { ...v, status } : v));
   }
 
-  constructor() { }
+  toggleMaintenance(id: string) {
+    this.vehiclesSignal.update(all => all.map(v => {
+      if (v.id === id) {
+        const nextStatus = v.status === 'Maintenance' ? 'Available' : 'Maintenance';
+        return { ...v, status: nextStatus as any };
+      }
+      return v;
+    }));
+  }
+
+  deleteVehicle(id: string) {
+    this.vehiclesSignal.update(all => all.filter(v => v.id !== id));
+  }
+
+  // 5. Initial Loader
+  private getInitialVehicles(): Vehicle[] {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [
+      { id: 'V101', plateNumber: 'LDN-5521', driverName: 'Alex Thompson', status: 'In Transit', fuelLevel: 82, lastLocation: { lat: 0, lng: 0 } },
+      { id: 'V102', plateNumber: 'MAN-9900', driverName: 'Sarah Jenkins', status: 'Available', fuelLevel: 45, lastLocation: { lat: 0, lng: 0 } }
+    ];
+  }
 }

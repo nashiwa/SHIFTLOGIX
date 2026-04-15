@@ -1,81 +1,62 @@
 <div class="dashboard-wrapper">
   <header>
     <h1>🚛 ShiftLogix Fleet Control</h1>
-    <p class="subtitle">Real-time logistics monitoring and management</p>
+    <p>Real-time logistics monitoring and management</p>
   </header>
 
-  <section class="form-container">
-    <h3>➕ Register New Vehicle</h3>
-    <form [formGroup]="vehicleForm" (ngSubmit)="addVehicle()">
-      <div class="input-group">
+  <section class="panel registration-panel">
+    <div class="panel-header">
+      <h3>➕ Register New Vehicle</h3>
+    </div>
+    <form [formGroup]="vehicleForm" (ngSubmit)="addVehicle()" class="horizontal-form">
+      
+      <div class="field-group" [class.has-error]="vehicleForm.get('plateNumber')?.invalid && vehicleForm.get('plateNumber')?.touched">
         <label>Plate Number</label>
         <input formControlName="plateNumber" placeholder="e.g. TX-9921">
         @if (vehicleForm.get('plateNumber')?.invalid && vehicleForm.get('plateNumber')?.touched) {
-          <small class="error">Min 5 characters required</small>
+          <span class="error-msg">Min 5 characters required</span>
         }
       </div>
 
-      <div class="input-group">
+      <div class="field-group" [class.has-error]="vehicleForm.get('driverName')?.invalid && vehicleForm.get('driverName')?.touched">
         <label>Driver Name</label>
         <input formControlName="driverName" placeholder="e.g. Mike Ross">
+        @if (vehicleForm.get('driverName')?.invalid && vehicleForm.get('driverName')?.touched) {
+          <span class="error-msg">Driver name is required</span>
+        }
       </div>
 
-      <div class="input-group">
-        <label>Initial Fuel %</label>
+      <div class="field-group small" [class.has-error]="vehicleForm.get('fuelLevel')?.invalid && vehicleForm.get('fuelLevel')?.touched">
+        <label>Fuel %</label>
         <input type="number" formControlName="fuelLevel">
+        @if (vehicleForm.get('fuelLevel')?.invalid && vehicleForm.get('fuelLevel')?.touched) {
+          <span class="error-msg">Limit 0-100</span>
+        }
       </div>
 
-      <button type="submit" [disabled]="vehicleForm.invalid" class="btn-add">
+      <button type="submit" [disabled]="vehicleForm.invalid" class="primary-btn">
         Add to Fleet
       </button>
     </form>
   </section>
 
   <section class="stats-container">
-    <div class="stat-card blue">
-      <span class="label">Total Fleet</span>
-      <span class="value">{{ total() }}</span>
-    </div>
-    <div class="stat-card orange">
-      <span class="label">In Transit</span>
-      <span class="value">{{ inTransit() }}</span>
-    </div>
-    <div class="stat-card green">
-      <span class="label">Avg Fuel Level</span>
-      <span class="value">{{ fuelAvg() }}%</span>
-    </div>
+    <div class="stat-card blue"><span>Total Fleet</span><strong>{{ total() }}</strong></div>
+    <div class="stat-card orange"><span>In Transit</span><strong>{{ inTransit() }}</strong></div>
+    <div class="stat-card green"><span>Avg Fuel</span><strong>{{ fuelAvg() }}%</strong></div>
   </section>
-  <div class="filter-bar" style="margin: 20px 0; display: flex; gap: 10px; align-items: center;">
-  <span style="font-weight: bold; color: #666;">Filter:</span>
-  
-  <button 
-    (click)="changeFilter('All')"
-    [style.background]="activeFilter() === 'All' ? '#3498db' : 'white'"
-    [style.color]="activeFilter() === 'All' ? 'white' : '#333'"
-    style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
-    All
-  </button>
 
-  <button 
-    (click)="changeFilter('Available')"
-    [style.background]="activeFilter() === 'Available' ? '#3498db' : 'white'"
-    [style.color]="activeFilter() === 'Available' ? 'white' : '#333'"
-    style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
-    Available
-  </button>
-
-  <button 
-    (click)="changeFilter('In Transit')"
-    [style.background]="activeFilter() === 'In Transit' ? '#3498db' : 'white'"
-    [style.color]="activeFilter() === 'In Transit' ? 'white' : '#333'"
-    style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
-    In Transit
-  </button>
-</div>
+  <div class="filter-bar">
+    <span>Filter Fleet:</span>
+    <button [class.active]="activeFilter() === 'All'" (click)="changeFilter('All')">All</button>
+    <button [class.active]="activeFilter() === 'Available'" (click)="changeFilter('Available')">Available</button>
+    <button [class.active]="activeFilter() === 'In Transit'" (click)="changeFilter('In Transit')">In Transit</button>
+    <button [class.active]="activeFilter() === 'Maintenance'" (click)="changeFilter('Maintenance')">Maintenance</button>
+  </div>
 
   <div class="card-grid">
     @for (vehicle of vehicles(); track vehicle.id) {
-      <div class="vehicle-card">
+      <div class="vehicle-card shadow-sm">
         <div class="card-header">
           <h3>{{ vehicle.plateNumber }}</h3>
           <span [class]="'badge ' + vehicle.status.toLowerCase().replace(' ', '-')">
@@ -83,30 +64,41 @@
           </span>
         </div>
 
-        <div class="card-body">
-          <p><strong>Driver:</strong> {{ vehicle.driverName }}</p>
-          
-          <div class="fuel-section">
-            <label>Fuel Level: {{ vehicle.fuelLevel }}%</label>
-            <div class="progress-bg">
-              <div class="progress-fill" [style.width.%]="vehicle.fuelLevel"></div>
-            </div>
+        <p><strong>Driver:</strong> {{ vehicle.driverName }}</p>
+        
+        <div class="fuel-section">
+          <label>Fuel Level: {{ vehicle.fuelLevel }}%</label>
+          <div class="progress-bg">
+            <div class="progress-fill" [style.width.%]="vehicle.fuelLevel"></div>
           </div>
         </div>
 
         <div class="card-footer">
           @if (vehicle.status === 'In Transit') {
             <button (click)="completeDelivery(vehicle.id)" class="btn-complete">
-              Confirm Delivery
+              Complete Delivery
             </button>
-          } @else {
-            <p class="status-msg">Vehicle is currently available</p>
+          } @else if (vehicle.status === 'Available') {
+             <p class="status-msg">Vehicle is currently available</p>
           }
+
+          <div class="action-row">
+            <button (click)="toggleMaint(vehicle.id)" 
+                    class="btn-maint" 
+                    [class.maint-active]="vehicle.status === 'Maintenance'">
+              🔧 {{ vehicle.status === 'Maintenance' ? 'Finish' : 'Maint.' }}
+            </button>
+            <button (click)="removeVehicle(vehicle.id)" class="btn-delete">
+              🗑️ Delete
+            </button>
+          </div>
         </div>
       </div>
     } @empty {
-      <div class="empty-state">
-        <p>No vehicles found in the fleet. Use the form above to add one.</p>
+      <div class="empty-state-container">
+        <div class="empty-icon">📂</div>
+        <h3>No Vehicles Found</h3>
+        <p>There are currently no vehicles matching the <strong>{{ activeFilter() }}</strong> status.</p>
       </div>
     }
   </div>
