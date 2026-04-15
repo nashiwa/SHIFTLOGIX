@@ -1,0 +1,113 @@
+<div class="dashboard-wrapper">
+  <header>
+    <h1>🚛 ShiftLogix Fleet Control</h1>
+    <p class="subtitle">Real-time logistics monitoring and management</p>
+  </header>
+
+  <section class="form-container">
+    <h3>➕ Register New Vehicle</h3>
+    <form [formGroup]="vehicleForm" (ngSubmit)="addVehicle()">
+      <div class="input-group">
+        <label>Plate Number</label>
+        <input formControlName="plateNumber" placeholder="e.g. TX-9921">
+        @if (vehicleForm.get('plateNumber')?.invalid && vehicleForm.get('plateNumber')?.touched) {
+          <small class="error">Min 5 characters required</small>
+        }
+      </div>
+
+      <div class="input-group">
+        <label>Driver Name</label>
+        <input formControlName="driverName" placeholder="e.g. Mike Ross">
+      </div>
+
+      <div class="input-group">
+        <label>Initial Fuel %</label>
+        <input type="number" formControlName="fuelLevel">
+      </div>
+
+      <button type="submit" [disabled]="vehicleForm.invalid" class="btn-add">
+        Add to Fleet
+      </button>
+    </form>
+  </section>
+
+  <section class="stats-container">
+    <div class="stat-card blue">
+      <span class="label">Total Fleet</span>
+      <span class="value">{{ total() }}</span>
+    </div>
+    <div class="stat-card orange">
+      <span class="label">In Transit</span>
+      <span class="value">{{ inTransit() }}</span>
+    </div>
+    <div class="stat-card green">
+      <span class="label">Avg Fuel Level</span>
+      <span class="value">{{ fuelAvg() }}%</span>
+    </div>
+  </section>
+  <div class="filter-bar" style="margin: 20px 0; display: flex; gap: 10px; align-items: center;">
+  <span style="font-weight: bold; color: #666;">Filter:</span>
+  
+  <button 
+    (click)="changeFilter('All')"
+    [style.background]="activeFilter() === 'All' ? '#3498db' : 'white'"
+    [style.color]="activeFilter() === 'All' ? 'white' : '#333'"
+    style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
+    All
+  </button>
+
+  <button 
+    (click)="changeFilter('Available')"
+    [style.background]="activeFilter() === 'Available' ? '#3498db' : 'white'"
+    [style.color]="activeFilter() === 'Available' ? 'white' : '#333'"
+    style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
+    Available
+  </button>
+
+  <button 
+    (click)="changeFilter('In Transit')"
+    [style.background]="activeFilter() === 'In Transit' ? '#3498db' : 'white'"
+    [style.color]="activeFilter() === 'In Transit' ? 'white' : '#333'"
+    style="padding: 8px 15px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer;">
+    In Transit
+  </button>
+</div>
+
+  <div class="card-grid">
+    @for (vehicle of vehicles(); track vehicle.id) {
+      <div class="vehicle-card">
+        <div class="card-header">
+          <h3>{{ vehicle.plateNumber }}</h3>
+          <span [class]="'badge ' + vehicle.status.toLowerCase().replace(' ', '-')">
+            {{ vehicle.status }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <p><strong>Driver:</strong> {{ vehicle.driverName }}</p>
+          
+          <div class="fuel-section">
+            <label>Fuel Level: {{ vehicle.fuelLevel }}%</label>
+            <div class="progress-bg">
+              <div class="progress-fill" [style.width.%]="vehicle.fuelLevel"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          @if (vehicle.status === 'In Transit') {
+            <button (click)="completeDelivery(vehicle.id)" class="btn-complete">
+              Confirm Delivery
+            </button>
+          } @else {
+            <p class="status-msg">Vehicle is currently available</p>
+          }
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <p>No vehicles found in the fleet. Use the form above to add one.</p>
+      </div>
+    }
+  </div>
+</div>
