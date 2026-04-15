@@ -1,59 +1,41 @@
-# Shiftlogix
+## Project Summary: ShiftLogix Fleet Control
+ShiftLogix is a modern enterprise solution designed for real-time logistics monitoring. It focuses on efficiency, data integrity, and a high-quality user experience.
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+### Core Functionalities
+Asset Lifecycle Management: A complete system to register, monitor, and retire fleet vehicles, ensuring a clear digital paper trail for every asset.
 
-## Development server
+Real-Time Status Tracking: Dynamic categorizing of vehicles into Available, In Transit, or Maintenance states to optimize dispatching decisions.
 
-To start a local development server, run:
+Operational Intelligence: Instant calculation of Key Performance Indicators (KPIs), including total fleet capacity, active delivery counts, and aggregate fuel efficiency.
 
-```bash
-ng serve
-```
+Persistent State: Integration of browser-level storage to ensure that fleet data remains consistent and accessible even after a system reboot or page refresh.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Technical Excellence
+Signals-Driven Reactivity: Built using the latest Angular Signals API, providing a high-performance, granular update mechanism that eliminates the need for expensive global re-renders.
 
-## Code scaffolding
+Robust Data Validation: Implementation of Reactive Forms with strict validation rules (Min/Max length and range checks) to prevent erroneous data entry.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Scalable Architecture: Utilization of a "Service-Component" pattern, separating business logic and data persistence from the user interface for better maintainability.
 
-```bash
-ng generate component component-name
-```
+Modern Design System: A custom-designed UI utilizing SCSS variables and Flexbox/Grid layouts, ensuring a professional, dashboard-style aesthetic across all screen sizes.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### User Experience (UX) Focus
+Contextual Feedback: Real-time visual validation cues (red alerts and status-specific colors) to guide the user through the data entry process.
 
-```bash
-ng generate --help
-```
+Empty State Handling: Intelligent UI placeholders that maintain the dashboard’s professional appearance even when no data matches the current filter.
 
-## Building
+Interactive Controls: Smooth transitions and hover effects that provide immediate tactile feedback for every user action.
 
-To build the project run:
+## 📦 Installation & Setup
 
-```bash
-ng build
-```
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/nashiwa/SHIFTLOGIX.git](https://github.com/nashiwa/SHIFTLOGIX.git)
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+2.  **Install Dependencies**
+    ```bash
+    npm install
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+2.  **Run the development server**
+    ```bash
+    ng serve
