@@ -46,19 +46,48 @@
     <div class="stat-card green"><span>Avg Fuel</span><strong>{{ fuelAvg() }}%</strong></div>
   </section>
 
-  <div class="filter-bar">
-    <span>Filter Fleet:</span>
-    <button [class.active]="activeFilter() === 'All'" (click)="changeFilter('All')">All</button>
-    <button [class.active]="activeFilter() === 'Available'" (click)="changeFilter('Available')">Available</button>
-    <button [class.active]="activeFilter() === 'In Transit'" (click)="changeFilter('In Transit')">In Transit</button>
-    <button [class.active]="activeFilter() === 'Maintenance'" (click)="changeFilter('Maintenance')">Maintenance</button>
+  <section class="activity-panel">
+    <div class="panel-header">
+      <h3>📜 Recent Activity Log</h3>
+    </div>
+    <div class="log-viewport">
+      @for (entry of history(); track entry.id) {
+        <div class="log-row" [class]="entry.type">
+          <span class="timestamp">{{ entry.timestamp | date:'HH:mm:ss' }}</span>
+          <span class="message">{{ entry.message }}</span>
+        </div>
+      } @empty {
+        <div class="no-activity">No actions recorded for this session.</div>
+      }
+    </div>
+  </section>
+
+  <div class="fleet-controls">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        placeholder="Search plate or driver..." 
+        (input)="updateSearch($event)"
+      >
+    </div>
+
+    <div class="filter-bar">
+      <span>Filter Status:</span>
+      <button [class.active]="activeFilter() === 'All'" (click)="changeFilter('All')">All</button>
+      <button [class.active]="activeFilter() === 'Available'" (click)="changeFilter('Available')">Available</button>
+      <button [class.active]="activeFilter() === 'In Transit'" (click)="changeFilter('In Transit')">In Transit</button>
+      <button [class.active]="activeFilter() === 'Maintenance'" (click)="changeFilter('Maintenance')">Maintenance</button>
+    </div>
   </div>
 
   <div class="card-grid">
     @for (vehicle of vehicles(); track vehicle.id) {
       <div class="vehicle-card shadow-sm">
         <div class="card-header">
-          <h3>{{ vehicle.plateNumber }}</h3>
+          <a [routerLink]="['/vehicle', vehicle.id]" class="plate-link">
+            <h3>{{ vehicle.plateNumber }} <small>➜</small></h3>
+          </a>
           <span [class]="'badge ' + vehicle.status.toLowerCase().replace(' ', '-')">
             {{ vehicle.status }}
           </span>
@@ -98,7 +127,7 @@
       <div class="empty-state-container">
         <div class="empty-icon">📂</div>
         <h3>No Vehicles Found</h3>
-        <p>There are currently no vehicles matching the <strong>{{ activeFilter() }}</strong> status.</p>
+        <p>No results for <strong>{{ activeFilter() }}</strong> vehicles with current search term.</p>
       </div>
     }
   </div>

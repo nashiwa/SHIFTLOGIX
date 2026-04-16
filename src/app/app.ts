@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { FleetDashboardComponent } from './features/fleet-dashboard/fleet-dashboard';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router'; // Required for <router-outlet> to work
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FleetDashboardComponent], 
+  imports: [CommonModule, RouterModule], 
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+//* Global app resets */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7f6; /* Matches your dashboard background */
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Smooth scrolling for the whole app */
+html {
+  scroll-behavior: smooth;
+}

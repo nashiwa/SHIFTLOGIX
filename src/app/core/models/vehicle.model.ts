@@ -1,4 +1,4 @@
-export interface Vehicle {  // <--- Make sure 'export' is here!
+export interface Vehicle {  
   id: string;
   plateNumber: string;
   driverName: string;
